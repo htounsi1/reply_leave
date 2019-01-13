@@ -3,6 +3,7 @@ application/cache/*
 !application/cache/.htaccess
 
 application/logs/*
+application/config/*
 !application/logs/index.html
 !application/logs/.htaccess
 /nbproject/private/
