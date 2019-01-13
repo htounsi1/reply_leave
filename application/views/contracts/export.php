@@ -7,25 +7,14 @@
  * @since         0.1.0
  */
 
-require_once FCPATH . "vendor/autoload.php";
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
-
+$sheet = $this->excel->setActiveSheetIndex(0);
 $sheet->setTitle(mb_strimwidth(lang('contract_index_title'), 0, 28, "..."));  //Maximum 31 characters allowed in sheet title.
 $sheet->setCellValue('A1', lang('contract_export_thead_id'));
 $sheet->setCellValue('B1', lang('contract_export_thead_name'));
 $sheet->setCellValue('C1', lang('contract_export_thead_start'));
 $sheet->setCellValue('D1', lang('contract_export_thead_end'));
 $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-$sheet->getStyle('A1:D1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('A1:D1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 $contracts = $this->contracts_model->getContracts();
 $line = 2;
@@ -50,5 +39,4 @@ foreach(range('A', 'D') as $colD) {
     $sheet->getColumnDimension($colD)->setAutoSize(TRUE);
 }
 
-$spreadsheet->exportName = 'contracts';
-writeSpreadsheet($spreadsheet);
+exportSpreadsheet($this, 'contracts');

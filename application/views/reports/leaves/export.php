@@ -8,18 +8,7 @@
  * @since         0.4.3
  */
 
-require_once FCPATH . "vendor/autoload.php";
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
-
+$sheet = $this->excel->setActiveSheetIndex(0);
 $sheet->setTitle(mb_strimwidth(lang('reports_export_leaves_title'), 0, 28, "..."));  //Maximum 31 characters allowed in sheet title.
 
 $month = $this->input->get("month") === FALSE ? 0 : $this->input->get("month");
@@ -43,7 +32,7 @@ if ($month == 0) {
 $types = $this->types_model->getTypes();
 $leave_requests = array();
 
-//Iterate on all employees of the entity
+//Iterate on all employees of the entity 
 $users = $this->organization_model->allEmployees($entity, $children);
 $result = array();
 foreach ($users as $user) {
@@ -57,7 +46,7 @@ foreach ($users as $user) {
     $result[$user->id]['contract'] = $user->contract;
     $non_working_days = $this->dayoffs_model->lengthDaysOffBetweenDates($user->contract_id, $start, $end);
     $opened_days = $total_days - $non_working_days;
-
+    
     //If the user has selected All months
     if ($month == 0) {
         $leave_duration = 0;
@@ -71,7 +60,7 @@ foreach ($users as $user) {
                     if (!array_key_exists($type['name'], $result[$user->id])) {
                         $result[$user->id][$type['name']] = 0;
                     }
-                    $result[$user->id][$type['name']] +=
+                    $result[$user->id][$type['name']] += 
                             $leaves_detail[$type['name']];
                 } else {
                     $result[$user->id][$type['name']] = '';
@@ -108,7 +97,7 @@ foreach ($result as $user_id => $row) {
     $index = 1;
     foreach ($row as $key => $value) {
         if ($line == 2) {
-            $colidx = columnName($index) . '1';
+            $colidx = $this->excel->column_name($index) . '1';
             if (in_array($key, $i18n)) {
                 $sheet->setCellValue($colidx, lang($key));
             } else {
@@ -116,7 +105,7 @@ foreach ($result as $user_id => $row) {
             }
             $max++;
         }
-        $colidx = columnName($index) . $line;
+        $colidx = $this->excel->column_name($index) . $line;
         $sheet->setCellValue($colidx, $value);
         $index++;
     }
@@ -150,15 +139,15 @@ foreach ($result as $user_id => $row) {
     }
 }
 
-$colidx = columnName($max) . '1';
+$colidx = $this->excel->column_name($max) . '1';
 $sheet->getStyle('A1:' . $colidx)->getFont()->setBold(true);
-$sheet->getStyle('A1:' . $colidx)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('A1:' . $colidx)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 //Autofit
 for ($ii=1; $ii <$max; $ii++) {
-    $col = columnName($ii);
+    $col = $this->excel->column_name($ii);
     $sheet->getColumnDimension($col)->setAutoSize(TRUE);
 }
 
-$spreadsheet->exportName = 'leave_requests_'. $month . '_' . $year;
-writeSpreadsheet($spreadsheet);
+$filename = 'leave_requests_'. $month . '_' . $year;
+exportSpreadsheet($this, $filename);

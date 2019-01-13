@@ -7,18 +7,7 @@
  * @since         0.2.0
  */
 
-require_once FCPATH . "vendor/autoload.php";
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
-
+$sheet = $this->excel->setActiveSheetIndex(0);
 $sheet->setTitle(mb_strimwidth(lang('hr_export_overtime_title'), 0, 28, "..."));  //Maximum 31 characters allowed in sheet title.
 $sheet->setCellValue('A3', lang('hr_export_overtime_thead_id'));
 $sheet->setCellValue('B3', lang('hr_export_overtime_thead_status'));
@@ -26,7 +15,8 @@ $sheet->setCellValue('C3', lang('hr_export_overtime_thead_date'));
 $sheet->setCellValue('D3', lang('hr_export_overtime_thead_duration'));
 $sheet->setCellValue('E3', lang('hr_export_overtime_thead_cause'));
 $sheet->getStyle('A3:E3')->getFont()->setBold(true);
-$sheet->getStyle('A3:E3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('A3:E3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
 
 $requests = $this->overtime_model->getExtrasOfEmployee($id);
 
@@ -50,5 +40,4 @@ foreach(range('A', 'E') as $colD) {
     $sheet->getColumnDimension($colD)->setAutoSize(TRUE);
 }
 
-$spreadsheet->exportName = 'overtime';
-writeSpreadsheet($spreadsheet);
+exportSpreadsheet($this, 'overtime');

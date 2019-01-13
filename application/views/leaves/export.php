@@ -7,18 +7,7 @@
  * @since         0.2.0
  */
 
-require_once FCPATH . "vendor/autoload.php";
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
-
+$sheet = $this->excel->setActiveSheetIndex(0);
 $sheet->setTitle(mb_strimwidth(lang('leaves_export_title'), 0, 28, "..."));  //Maximum 31 characters allowed in sheet title.
 $sheet->setCellValue('A1', lang('leaves_export_thead_id'));
 $sheet->setCellValue('B1', lang('leaves_export_thead_start_date'));
@@ -30,7 +19,7 @@ $sheet->setCellValue('G1', lang('leaves_export_thead_type'));
 $sheet->setCellValue('H1', lang('leaves_export_thead_status'));
 $sheet->setCellValue('I1', lang('leaves_export_thead_cause'));
 $sheet->getStyle('A1:I1')->getFont()->setBold(true);
-$sheet->getStyle('A1:I1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('A1:I1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 $leaves = $this->leaves_model->getLeavesOfEmployee($this->user_id);
 $line = 2;
@@ -56,5 +45,4 @@ foreach(range('A', 'I') as $colD) {
     $sheet->getColumnDimension($colD)->setAutoSize(TRUE);
 }
 
-$spreadsheet->exportName = 'leaves';
-writeSpreadsheet($spreadsheet);
+exportSpreadsheet($this, 'leaves');
